@@ -1,0 +1,8 @@
+ten_bien,kieu_du_lieu,don_vi,nguon,thoi_diem_ghi_nhan,y_nghia,gia_tri_thieu,co_dinh_danh,duoc_dung_lam_dau_vao_tai_T,ghi_chu
+G1,integer,diem_0_20,UCI student-por.csv,ky_1,Diem ky 1,khong theo UCI,khong,co,Thong tin truoc moc du doan
+G2,integer,diem_0_20,UCI student-por.csv,ky_2,Diem ky 2,khong theo UCI,khong,co,Moc du doan sau ky 2; tuong quan manh voi G3
+G3,integer,diem_0_20,UCI student-por.csv,cuoi_nam,Diem cuoi nam va nguon tao nhan,khong theo UCI,khong,khong,Tuyet doi khong dung lam dau vao
+low_risk_label,binary,0_1,tao_tu_G3,sau_ky_2,1 neu G3 < 10 nguoc lai 0,khong,khong,khong,Nhan muc tieu; xac nhan nguong voi GVHD
+absences,integer,so_buoi,UCI student-por.csv,nam_hoc,So buoi vang,khong theo UCI,khong,co,Kiem tra xem du lieu co san tai moc T khong truoc khi dung
+school,categorical,ma_truong,UCI student-por.csv,thong_tin_ho_so,Truong hoc,khong theo UCI,khong,co,Xem xet rui ro thien lech
+studytime,ordinal,ma_1_4,UCI student-por.csv,thong_tin_khao_sat,Thoi gian hoc hang tuan,khong theo UCI,khong,co,Ma muc tu 1 den 4 theo mo ta UCI

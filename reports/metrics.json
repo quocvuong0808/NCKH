@@ -1,0 +1,178 @@
+{
+  "dataset": "UCI Student Performance / student-por.csv",
+  "sha256": "a7594a11d7771c0efe1a740824e0e833da9c4cad07c39a9766a874575563fb3f",
+  "target": "G3 < 10/20",
+  "n_rows": 649,
+  "n_risk": 100,
+  "split": "Stratified 80/20 seed 42; same rows for both stages",
+  "limitations": [
+    "Portuguese secondary school students, not Vietnamese university students",
+    "No person IDs: cannot verify person overlap",
+    "Grade-only features; no claim about activity collection time",
+    "Uncalibrated model scores; fixed threshold 0.5",
+    "G1/G2 may differ in assessment difficulty"
+  ],
+  "stages": {
+    "G1": {
+      "features": [
+        "G1"
+      ],
+      "selected_by_training_cv": "logistic",
+      "training_cv_f1": {
+        "majority": 0.0,
+        "logistic": 0.7148395180406124,
+        "tree": 0.7148395180406124
+      },
+      "test_results": {
+        "rule_grade_below_10": {
+          "precision": 0.4473684210526316,
+          "recall": 0.85,
+          "f1": 0.5862068965517241,
+          "accuracy": 0.8153846153846154,
+          "confusion_matrix": [
+            [
+              89,
+              21
+            ],
+            [
+              3,
+              17
+            ]
+          ]
+        },
+        "majority": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "accuracy": 0.8461538461538461,
+          "confusion_matrix": [
+            [
+              110,
+              0
+            ],
+            [
+              20,
+              0
+            ]
+          ],
+          "average_precision": 0.15384615384615385
+        },
+        "logistic": {
+          "precision": 0.4473684210526316,
+          "recall": 0.85,
+          "f1": 0.5862068965517241,
+          "accuracy": 0.8153846153846154,
+          "confusion_matrix": [
+            [
+              89,
+              21
+            ],
+            [
+              3,
+              17
+            ]
+          ],
+          "average_precision": 0.6709445440671108
+        },
+        "tree": {
+          "precision": 0.4473684210526316,
+          "recall": 0.85,
+          "f1": 0.5862068965517241,
+          "accuracy": 0.8153846153846154,
+          "confusion_matrix": [
+            [
+              89,
+              21
+            ],
+            [
+              3,
+              17
+            ]
+          ],
+          "average_precision": 0.6478676209901877
+        }
+      }
+    },
+    "G2": {
+      "features": [
+        "G1",
+        "G2"
+      ],
+      "selected_by_training_cv": "logistic",
+      "training_cv_f1": {
+        "majority": 0.0,
+        "logistic": 0.764231090029898,
+        "tree": 0.6556830389214074
+      },
+      "test_results": {
+        "rule_grade_below_10": {
+          "precision": 0.6206896551724138,
+          "recall": 0.9,
+          "f1": 0.7346938775510204,
+          "accuracy": 0.9,
+          "confusion_matrix": [
+            [
+              99,
+              11
+            ],
+            [
+              2,
+              18
+            ]
+          ]
+        },
+        "majority": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "accuracy": 0.8461538461538461,
+          "confusion_matrix": [
+            [
+              110,
+              0
+            ],
+            [
+              20,
+              0
+            ]
+          ],
+          "average_precision": 0.15384615384615385
+        },
+        "logistic": {
+          "precision": 0.5625,
+          "recall": 0.9,
+          "f1": 0.6923076923076923,
+          "accuracy": 0.8769230769230769,
+          "confusion_matrix": [
+            [
+              96,
+              14
+            ],
+            [
+              2,
+              18
+            ]
+          ],
+          "average_precision": 0.8648347928089308
+        },
+        "tree": {
+          "precision": 0.5454545454545454,
+          "recall": 0.9,
+          "f1": 0.6792452830188679,
+          "accuracy": 0.8692307692307693,
+          "confusion_matrix": [
+            [
+              95,
+              15
+            ],
+            [
+              2,
+              18
+            ]
+          ],
+          "average_precision": 0.7432242942242943
+        }
+      }
+    }
+  }
+}
