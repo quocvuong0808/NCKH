@@ -9,7 +9,18 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from core import FEATURES, analyze_courses, save_feedback
 from auth_ui import require_login
+from alerts import style_alert_rows
 from gpa import SOURCE, KINDS, analyze_semester, semester_feedback
+
+def show_course_alerts(table):
+    red = table[table.muc_canh_bao == 2]
+    amber = table[table.muc_canh_bao == 1]
+    if not red.empty:
+        st.error("🔴 Điểm thấp cần ưu tiên: " + "; ".join(red.ma_mon + " · " + red.ten_mon))
+    if not amber.empty:
+        st.warning("🟠 Môn cần chú ý: " + "; ".join(amber.ma_mon + " · " + amber.ten_mon))
+    st.caption("Dấu màu là nhắc nhở theo quy tắc điểm của ứng dụng, không phải quyết định cảnh báo học vụ của trường. Đỏ: hệ 10 < 4 hoặc hệ 4 < 2; cam: hệ 10 từ 4 đến dưới 5,5 hoặc hệ 4 từ 2 đến dưới 2,5. Các ngưỡng hệ 4 theo dõi riêng, không phải quy đổi tuyến tính từ hệ 10. GPA dùng điểm học phần sau làm tròn; theo dõi trong kỳ dùng điểm tại mốc đang chọn.")
+
 
 st.set_page_config(page_title="UTH | Theo dõi học tập", page_icon="🎓", layout="wide")
 st.markdown("""<style>
@@ -59,7 +70,7 @@ with tab1:
     left, right = st.columns([2, 1], gap="large")
     data = None
     with left:
-        mode = st.radio("Cách nhập", ["Thêm / cập nhật từng môn", "Tải CSV"], horizontal=True)
+        mode = st.radio("Cách nhập", ["Thêm / cập nhật từng môn", "Tải CSV", "Dán CSV"], horizontal=True)
         if mode == "Thêm / cập nhật từng môn":
             with st.form(f"input_{stage}_{scale}"):
                 course_code = st.text_input("Mã môn", placeholder="Ví dụ: IT101", key="course_code")
@@ -71,11 +82,18 @@ with tab1:
                 old = st.session_state.get(dataset_key, pd.DataFrame(columns=row.columns))
                 old = old[~old["ma_mon"].eq(course_code.strip())]
                 data = pd.concat([old, row], ignore_index=True)
-        else:
+        elif mode == "Tải CSV":
             upload = st.file_uploader(f"CSV danh sách môn · hệ {scale}", type="csv", key=f"upload_{stage}_{scale}_{semester}")
             if upload:
                 try:
                     data = pd.read_csv(io.BytesIO(upload.getvalue()), sep=None, engine="python", dtype={"hoc_ky": str, "ma_mon": str, "ten_mon": str})
+                except Exception as exc:
+                    st.error(f"Không đọc được CSV: {exc}")
+        else:
+            csv_text = st.text_area("Dán CSV danh sách môn", key=f"paste_courses_{stage}_{scale}_{semester}", height=160)
+            if csv_text.strip():
+                try:
+                    data = pd.read_csv(io.StringIO(csv_text), sep=None, engine="python", dtype={"hoc_ky": str, "ma_mon": str, "ten_mon": str})
                 except Exception as exc:
                     st.error(f"Không đọc được CSV: {exc}")
     with right:
@@ -100,7 +118,8 @@ with tab1:
         else:
             st.divider()
             st.subheader(f"Danh sách môn · {semester}")
-            st.dataframe(result, width="stretch", hide_index=True)
+            show_course_alerts(result)
+            st.dataframe(style_alert_rows(result), width="stretch", hide_index=True)
             selected_code = st.selectbox("Xem phân tích riêng một môn", result.ma_mon.tolist(), key="selected_course", format_func=lambda code: f"{code} · {result.loc[result.ma_mon == code, 'ten_mon'].iloc[0]}")
             course = result[result.ma_mon == selected_code].iloc[0]
             st.markdown("#### " + course.ten_mon)
@@ -128,7 +147,7 @@ with gpa_tab:
     st.info("Không nhập điểm thi cuối kỳ đơn lẻ hoặc G1/G2 vào đây. Nhập điểm học phần đã tổng hợp các thành phần theo đề cương. Đây là GPA học kỳ, không phải GPA tích lũy hoặc xếp hạng tốt nghiệp.")
     key = f"official_courses_{semester}"
     gpa_data = None
-    entry = st.radio("Nhập điểm chính thức", ["Thêm / cập nhật môn học", "Tải CSV điểm học phần"], horizontal=True, key="gpa_entry")
+    entry = st.radio("Nhập điểm chính thức", ["Thêm / cập nhật môn học", "Tải CSV điểm học phần", "Dán CSV điểm học phần"], horizontal=True, key="gpa_entry")
     if entry == "Thêm / cập nhật môn học":
         with st.form("gpa_form"):
             c1, c2 = st.columns(2)
@@ -144,7 +163,7 @@ with gpa_tab:
             old = st.session_state.get(key, pd.DataFrame(columns=row.columns))
             old = old[~old.ma_mon.eq(code.strip())]
             gpa_data = pd.concat([old, row], ignore_index=True)
-    else:
+    elif entry == "Tải CSV điểm học phần":
         uploaded = st.file_uploader("CSV điểm chính thức và tín chỉ", type="csv", key=f"gpa_upload_{semester}")
         if uploaded:
             try:
@@ -155,6 +174,16 @@ with gpa_tab:
                     raise ValueError("CSV phải chỉ chứa học kỳ đang chọn ở thanh bên.")
             except Exception as exc:
                 st.error(f"Không đọc được danh sách: {exc}")
+                gpa_data = None
+    else:
+        csv_text = st.text_area("Dán CSV điểm học phần", height=180, key=f"paste_gpa_{semester}")
+        if csv_text.strip():
+            try:
+                gpa_data = pd.read_csv(io.StringIO(csv_text), sep=None, engine="python", dtype={"hoc_ky": str, "ma_mon": str, "ten_mon": str})
+                if "hoc_ky" not in gpa_data or not gpa_data.hoc_ky.astype(str).str.strip().eq(semester).all():
+                    raise ValueError("CSV phải có hoc_ky và chỉ chứa học kỳ đang chọn.")
+            except Exception as exc:
+                st.error(f"Không đọc được CSV: {exc}")
                 gpa_data = None
     with st.expander("CSV mẫu và hướng dẫn", expanded=False):
         sample = pd.DataFrame({"hoc_ky": [semester] * 3, "ma_mon": ["IT101", "MA101", "EN101"], "ten_mon": ["Lập trình C/C++", "Toán cao cấp", "Tiếng Anh"], "so_tin_chi": [3, 2, 2], "diem_he10": [8.5, 7, 5.5], "loai": ["TINH_GPA"] * 3})
@@ -187,7 +216,10 @@ with gpa_tab:
         if summary["so_mon_chua_hoan_thien"]:
             st.warning(f"Còn {summary['so_mon_chua_hoan_thien']} môn I/X chưa hoàn thiện. Đây chưa phải tổng kết đầy đủ của học kỳ.")
         strengths, actions, message = semester_feedback(table, summary)
-        st.success(message) if summary["gpa"] is not None and summary["gpa"] >= 3.2 else st.info(message)
+        if summary["gpa"] is not None and summary["gpa"] >= 3.2:
+            st.success(message)
+        else:
+            st.info(message)
         st.markdown("##### Điểm mạnh theo kết quả môn học")
         st.write(strengths)
         st.markdown("##### Nội dung cần cải thiện và kế hoạch")
@@ -197,7 +229,8 @@ with gpa_tab:
         else:
             st.write("Chưa có môn C/D/F trong danh sách. Tiếp tục duy trì lịch học và luyện tập nâng cao.")
         st.caption("Nhận xét dựa trên điểm, không kết luận về năng lực hay nguyên nhân cá nhân. Ưu tiên môn F, sau đó D/C và môn nhiều tín chỉ. Gợi ý học cải thiện phải đối chiếu quy định trường.")
-        st.dataframe(table, hide_index=True, width="stretch")
+        show_course_alerts(table)
+        st.dataframe(style_alert_rows(table), hide_index=True, width="stretch")
         chosen = st.selectbox("Chi tiết và mục tiêu từng môn", table.ma_mon.tolist(), key=f"gpa_selected_{semester}", format_func=lambda code: f"{code} · {table.loc[table.ma_mon == code, 'ten_mon'].iloc[0]}")
         course = table[table.ma_mon == chosen].iloc[0]
         st.write(f"**{course.ten_mon}** · {course.so_tin_chi} tín chỉ · Điểm chữ {course.diem_chu}")

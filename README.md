@@ -72,3 +72,7 @@ Danh sách được giữ trong phiên trình duyệt; tải CSV/JSON để lưu
 ```
 
 Các mô hình và báo cáo UCI cũ chỉ phục vụ thử nghiệm phương pháp, không tính GPA và không được dùng làm bằng chứng dự báo cho UTH. Nguồn UCI tại docs/06_nguon_du_lieu.md. Xem docs/08_gpa_theo_thong_tu_08.md để biết phạm vi áp dụng.
+
+## Dấu cảnh báo tự động theo môn
+
+Cả nhập tay, tải CSV và dán CSV đều tự phân tích sau khi lưu/nhận dữ liệu hợp lệ. Bảng hiển thị biểu tượng và tô dòng đỏ/cam: hệ 10 dưới 4 là đỏ, từ 4 đến dưới 5,5 là cam; ở phần theo dõi hệ 4, dưới 2 là đỏ và từ 2 đến dưới 2,5 là cam theo quy tắc ứng dụng. Đây không phải quy đổi hai thang hay cảnh báo học vụ chính thức. Môn P/I/X/R/NGOAI_CT trong bảng GPA hiển thị không đánh giá, không gán nguy cơ thấp. GPA dùng điểm đã làm tròn; phần theo dõi dùng điểm đánh giá hiện tại. Khi điểm được cập nhật, cảnh báo tự tính lại và có trong CSV xuất.

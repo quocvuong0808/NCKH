@@ -4,6 +4,7 @@ from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 import pandas as pd
+from alerts import attach_alerts
 
 FEATURES = {"G1": ["G1"], "G2": ["G1", "G2"]}
 
@@ -82,6 +83,8 @@ def analyze_grades(data, stage, scale):
         else "Duy trì kế hoạch học tập và theo dõi lần đánh giá tiếp theo."
         for _, row in result.iterrows()
     ]
+    result = attach_alerts(result, stage, scale)
+    result.loc[result.muc_canh_bao > 0, "goi_y"] = "Ưu tiên ôn kiến thức nền, làm lại các bài sai và trao đổi giảng viên để lập kế hoạch cải thiện môn này."
     return result
 
 

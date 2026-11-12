@@ -1,6 +1,7 @@
 """Quy đổi cơ bản Điều 9–10 TT08/2021; chưa thay thế quy chế riêng UTH."""
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 import pandas as pd
+from alerts import attach_alerts
 
 SOURCE = "https://datafiles.chinhphu.vn/cpp/files/vbpq/2021/04/08-bgd.signed.pdf"
 KINDS = ["TINH_GPA", "P", "I", "X", "R", "NGOAI_CT"]
@@ -100,6 +101,7 @@ def analyze_semester(data):
         summary["muc_tieu_gpa_tiep_theo"] = {"gpa": float(target), "xep_loai": label, "khoang_cach": float(target - gpa)}
     else:
         summary["muc_tieu_gpa_tiep_theo"] = None
+    result = attach_alerts(result, "diem_he10", 10, eligible=result.tinh_gpa)
     return result, summary
 
 def semester_feedback(result, summary):
